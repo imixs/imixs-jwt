@@ -35,21 +35,20 @@ import java.util.logging.Logger;
 
 import javax.crypto.SecretKey;
 
-import org.imixs.jwt.HMAC;
 import org.junit.Before;
 import org.junit.Test;
 
 import junit.framework.Assert;
 
 /**
- * Test JWTBuilder class. Signing token
+ * Test JWTParser class. Verify a token
  * 
  * @author rsoika
  * 
  */
-public class JWTBuilderTest {
+public class JWTParserTest {
 
-	private static Logger logger = Logger.getLogger(JWTBuilderTest.class.getName());
+	private static Logger logger = Logger.getLogger(JWTParserTest.class.getName());
 
 	String header;
 	String payload;
@@ -93,22 +92,21 @@ public class JWTBuilderTest {
 	 * @throws UnsupportedEncodingException
 	 */
 	@Test
-	public void testSignatureEncoded() throws JWTException {
+	public void testVerify() throws JWTException {
 
 		SecretKey secretKey = HMAC.createKey(algorithm, secret.getBytes());
 
-		JWTBuilder builder = new JWTBuilder().setKey(secretKey).setEncodedHeader(encodedHeader)
-				.setEncodedPayload(encodedPayload).sign();
+		String _payload = new JWTParser().setKey(secretKey).setToken(token).verify().getPayload();
 
-		logger.info("header=" + HMAC.decodeBase64(encodedHeader.getBytes()));
-		logger.info("payload=" + HMAC.decodeBase64(encodedPayload.getBytes()));
-		logger.info("signature=" + builder.getSignature());
-		Assert.assertEquals(signature, builder.getSignature());
+		logger.info("payload=" + _payload);
+
+		Assert.assertEquals(payload, _payload);
 
 	}
 
 	/**
-	 * Test signature with JSON data, based on the iwt.io debugger example
+	 * Test a corrupted signature with encoded data, based on the iwt.io
+	 * debugger example
 	 * 
 	 * https://jwt.io/
 	 * 
@@ -120,50 +118,20 @@ public class JWTBuilderTest {
 	 * @throws IllegalStateException
 	 * @throws UnsupportedEncodingException
 	 */
+	@SuppressWarnings("unused")
 	@Test
-	public void testSignatureJSON() throws JWTException {
+	public void testVerifyInvalidData() {
 
 		SecretKey secretKey = HMAC.createKey(algorithm, secret.getBytes());
 
-		JWTBuilder builder = new JWTBuilder().setKey(secretKey).setHeader(header).setPayload(payload).sign();
+		try {
+			String _payload = new JWTParser().setKey(secretKey).setToken(token + "x").verify().getPayload();
+			Assert.fail();
+		} catch (JWTException e) {
+			// expected invalid signature
+			Assert.assertEquals("INVALID_SIGNATURE", e.errorCode);
+		}
 
-		logger.info("signature=" + builder.getSignature());
-		Assert.assertEquals(signature, builder.getSignature());
-
-		
-	}
-
-	/**
-	 * Test JSON Web token, based on the iwt.io debugger example
-	 * 
-	 * https://jwt.io/
-	 * 
-	 * @throws JWTException
-	 * 
-	 * @throws InvalidKeyException
-	 * @throws SignatureException
-	 * @throws NoSuchAlgorithmException
-	 * @throws IllegalStateException
-	 * @throws UnsupportedEncodingException
-	 */
-	@Test
-	public void testJSONWebToken() throws JWTException {
-
-		SecretKey secretKey = HMAC.createKey(algorithm, secret.getBytes());
-
-		JWTBuilder builder = new JWTBuilder().setKey(secretKey).setHeader(header).setPayload(payload).sign();
-
-		logger.info("JWT=" + builder.getToken());
-		Assert.assertEquals(token, builder.getToken());
-
-		
-		// test short form
-		builder = new JWTBuilder().setKey(secretKey).setPayload(payload);
-
-		logger.info("JWT=" + builder.getToken());
-		Assert.assertEquals(token, builder.getToken());
-
-	
 	}
 
 }

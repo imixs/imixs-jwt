@@ -32,6 +32,13 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.SecretKey;
 
+/**
+ * The JWTBuilder can be used to construct a JSON Web Token. The Builder expects
+ * a valid SecrectKey to sign the token.
+ * 
+ * @author rsoika
+ *
+ */
 public class JWTBuilder {
 
 	SecretKey key;
@@ -41,6 +48,28 @@ public class JWTBuilder {
 
 	public JWTBuilder setKey(SecretKey key) {
 		this.key = key;
+		return this;
+	}
+
+	/**
+	 * Set a JSON header. The header will be base64 encoded.
+	 * 
+	 * @param header
+	 * @return
+	 */
+	public JWTBuilder setHeader(String header) {
+		this.header = HMAC.encodeBase64(header.getBytes());
+		return this;
+	}
+
+	/**
+	 * Set a JSON payload. The payload will be base64 encoded.
+	 * 
+	 * @param encodedHeader
+	 * @return
+	 */
+	public JWTBuilder setPayload(String payload) {
+		this.payload = HMAC.encodeBase64(payload.getBytes());
 		return this;
 	}
 
@@ -56,17 +85,6 @@ public class JWTBuilder {
 	}
 
 	/**
-	 * Set a JSON header. The header will be base64 encoded.
-	 * 
-	 * @param header
-	 * @return
-	 */
-	public JWTBuilder setJSONHeader(String header) {
-		this.header = HMAC.encodeBase64(header.getBytes());
-		return this;
-	}
-
-	/**
 	 * Set the base64 encoded payload
 	 * 
 	 * @param encodedHeader
@@ -74,17 +92,6 @@ public class JWTBuilder {
 	 */
 	public JWTBuilder setEncodedPayload(String payload) {
 		this.payload = payload;
-		return this;
-	}
-
-	/**
-	 * Set a JSON payload. The payload will be base64 encoded.
-	 * 
-	 * @param encodedHeader
-	 * @return
-	 */
-	public JWTBuilder setJSONPayload(String payload) {
-		this.payload = HMAC.encodeBase64(payload.getBytes());
 		return this;
 	}
 
@@ -141,7 +148,7 @@ public class JWTBuilder {
 
 		if (header == null) {
 			// create default header
-			setJSONHeader("{\"alg\":\"" + JWSAlgorithm.getJWA(key.getAlgorithm()) + "\",\"typ\":\"JWT\"}");
+			setHeader("{\"alg\":\"" + JWSAlgorithm.getJWA(key.getAlgorithm()) + "\",\"typ\":\"JWT\"}");
 		}
 
 		if (signature == null) {
