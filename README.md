@@ -1,6 +1,7 @@
 # Imixs-JWT
 
 Imixs-JWT is a compact easy to use library to generate and verify JSON Web Tokens.
+The project also provides a JASPIC authentication module to be used in Java EE application servers. 
 
 
 ##Installation
@@ -68,3 +69,49 @@ To verify and extract the payload of a JSON Web Token (as build in the example b
 	}
 
    
+# JASPIC Auth Module
+
+Imixs-JWT provides a JASPIC authentication module to be used in Java EE Application servers. 
+
+The payload of the JSON Web Token must have the following format:
+
+	{"sub":"admin","displayname":"Administrator","groups":["xxx","yyy"]}
+
+Where 'sub' is the principal and 'groups' provides an array of groupnames (roles) assigned to the principal. 
+With the TokenGenerator a JWT token can be generated:
+
+	java -cp classes org.imixs.jwt.TokenGenerator secret {"sub":"admin","displayname":"Administrator","groups":["xxx","yyy"]}
+
+## Configuration for Wildfly 10
+
+To install the AuthModule in a Wildfly 10 application server, the module must be part of the web application.
+To activate the JASPIC module  the file *WEB-INF/jboss-web.xml* needs to be added, that references the corresponding JASPIC domain:
+
+
+	<?xml version="1.0"?>
+	<jboss-web>
+	    <security-domain>imixs-jwt</security-domain>
+	</jboss-web>
+
+The security domain can be configured in the standalone.xml file:
+
+	<!-- imixs-jwt module  -->
+    <security-domain name="imixs-jwt">
+		<authentication-jaspi>
+			<login-module-stack name="imixs-jwt-stack">
+				 <login-module code="Dummy"  flag="optional"/>
+			</login-module-stack>
+			<auth-module code="org.imixs.jwt.jaspic.JWTAuthModule">
+			 	<module-option name="secret" value="secret"/>
+			</auth-module>
+		</authentication-jaspi>
+	</security-domain>
+
+The module-option 'secret' contains the JWT password for decoding the token.
+
+
+Find more information about JASPIC for Wildfly here:
+
+- http://arjan-tijms.omnifaces.org/2015/08/activating-jaspic-in-jboss-wildfly.html
+- https://developer.jboss.org/wiki/JBossAS7EnablingJASPIAuthenticationForWebApplications
+- https://stackoverflow.com/questions/30033105/jaspic-module-not-propagating-principal-to-local-ejb-in-jboss-7-4

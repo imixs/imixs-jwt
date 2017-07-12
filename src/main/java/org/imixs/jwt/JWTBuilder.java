@@ -45,6 +45,8 @@ public class JWTBuilder {
 	String header;
 	String payload;
 	String signature;
+	
+	public static String DEFAULT_HEADER = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
 
 	public JWTBuilder setKey(SecretKey key) {
 		this.key = key;
