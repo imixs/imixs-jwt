@@ -2,15 +2,13 @@ package org.imixs.jwt;
 
 import javax.crypto.SecretKey;
 
-import junit.framework.Assert;
-
 /**
  * This Java App can be used to generate a JWT Token
  * 
  * The application expects two parameters: password and payload token:
  * 
  *  <pre>
- *     java -cp classes org.imixs.jwt.TokenGenerator secret {"sub":"admin","displayname":"Administrator","groups":"xxx,yyy"}
+ *     java -cp classes org.imixs.jwt.TokenGenerator secret {"sub":"admin","displayname":"Administrator","groups":["xxx","yyy"]}
  *  </pre>
  *   
  * @author rsoika  
