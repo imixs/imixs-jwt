@@ -37,8 +37,8 @@ public class JWTException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
-	protected String errorContext = "UNDEFINED";
-	protected String errorCode = "UNDEFINED";
+	public String errorContext = "UNDEFINED";
+	public String errorCode = "UNDEFINED";
 
 	public JWTException(String aErrorCode, String message) {
 		super(message);
