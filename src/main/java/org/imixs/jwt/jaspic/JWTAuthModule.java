@@ -68,7 +68,6 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	/**
 	 * get Module specific options as configured in options Map
 	 * 
-	 * @todo : https://github.com/imixs/imixs-jwt/issues/5
 	 * 
 	 */
 	@SuppressWarnings("rawtypes")
@@ -116,22 +115,6 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	 *         <li>AuthStatus.SUCCESS when the application request message was
 	 *         successfully validated.
 	 * 
-	 *         <li>AuthStatus.SEND_SUCCESS to indicate that
-	 *         validation/processing of the request message successfully
-	 *         produced the secured application response message (in
-	 *         messageInfo). The secured response message is available by
-	 *         calling getResponseMessage on messageInfo.
-	 * 
-	 *         <li>AuthStatus.SEND_CONTINUE to indicate that message validation
-	 *         is incomplete, and that a preliminary response was returned as
-	 *         the response message in messageInfo.
-	 * 
-	 *         When this status value is returned to challenge an application
-	 *         request message, the challenged request must be saved by the
-	 *         authentication module such that it can be recovered when the
-	 *         module's validateRequest message is called to process the request
-	 *         returned for the challenge.
-	 * 
 	 *         <li>AuthStatus.SEND_FAILURE to indicate that message validation
 	 *         failed and that an appropriate failure response message is
 	 *         available by calling getResponseMessage on messageInfo.
@@ -145,20 +128,23 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject)
 			throws AuthException {
 
-		// verify if authentication for the requested resource is mandatory
-		Object mandatoryKey = messageInfo.getMap().get(IS_MANDATORY_INFO_KEY);
-		if (mandatoryKey == null || Boolean.parseBoolean(mandatoryKey.toString()) == false) {
-			logger.finest("request not mandatory");
-			return AuthStatus.SUCCESS;
-		}
 		// authentication mandatory...
 		HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
 		HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
 
 		String payload = null;
-
 		try {
+			// First we consume the JWT in any way - even if the requested URL is not
+			// mandatory
 			payload = consumeJWTPayload(request, response);
+
+			// verify if authentication for the requested resource is mandatory
+			Object mandatoryKey = messageInfo.getMap().get(IS_MANDATORY_INFO_KEY);
+			if (mandatoryKey == null || Boolean.parseBoolean(mandatoryKey.toString()) == false) {
+				logger.finest("request not mandatory");
+				// no further validation is needed.
+				return AuthStatus.SUCCESS;
+			}
 
 			if (payload == null) {
 				logger.fine("validateRequest failed!");
@@ -175,6 +161,7 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 			}
 		} catch (JWTException e) {
 			logger.severe(e.getMessage());
+			cleanSubject(messageInfo, clientSubject);
 			e.printStackTrace();
 			return AuthStatus.FAILURE;
 		}
@@ -298,7 +285,7 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	 */
 
 	/**
-	 * This Method returns the payload of the current JSON Web Token. If the
+	 * This Method extracts a JSON Web Token and returns the payload of the current token. If the
 	 * current request contains a JWT the method extracts the payload from the
 	 * JSON Web Token and store the payload into the current session. If the
 	 * request contains no JWT the method test if the session contains a payload
