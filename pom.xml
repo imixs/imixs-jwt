@@ -155,4 +155,5 @@
 			</build>
 		</profile>
 	</profiles>
+	<name>Imixs-JWT</name>
 </project>
