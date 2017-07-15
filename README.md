@@ -4,7 +4,7 @@ Imixs-JWT is a compact easy to use library to generate and verify JSON Web Token
 The project also provides a JASPIC authentication module to be used in Java EE application servers. 
 
 
-##Installation
+## Installation
 
 Imixs-JWT is based on maven. Add the following dependency available from Maven Central:
 
