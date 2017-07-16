@@ -11,7 +11,7 @@ Imixs-JWT is based on maven. Add the following dependency available from Maven C
 	<dependency>
 	     <groupId>org.imixs.jwt</groupId>
 	     <artifactId>imixs-jwt</artifactId>
-	     <version>0.0.1-SNAPSHOT</version>
+	     <version>1.0.0</version>
 	</dependency>
 
 ## Quickstart
@@ -75,17 +75,18 @@ Imixs-JWT provides a JASPIC authentication module to be used in Java EE Applicat
 
 The payload of the JSON Web Token must have the following format:
 
-	{"sub":"admin","displayname":"Administrator","groups":["xxx","yyy"]}
+	{"sub":"admin","groups":["xxx","yyy"],"displayname":"Administrator"}
 
-Where 'sub' is the principal and 'groups' provides an array of groupnames (roles) assigned to the principal. 
-With the TokenGenerator a JWT token can be generated:
+Where 'sub' is the principal and 'groups' provides an array of groupnames (roles) assigned to the principal. Additional user attributes (like email or a displayname) can be added as optional key-value pairs. 
+
+With the TokenGenerator a JWT token can be generated from the command line:
 
 	java -cp classes org.imixs.jwt.TokenGenerator secret {"sub":"admin","displayname":"Administrator","groups":["xxx","yyy"]}
 
 ## Configuration for Wildfly 10
 
 To install the AuthModule in a Wildfly 10 application server, the module must be part of the web application.
-To activate the JASPIC module  the file *WEB-INF/jboss-web.xml* needs to be added, that references the corresponding JASPIC domain:
+To activate the JASPIC module, the file *WEB-INF/jboss-web.xml* needs to be added, that references the corresponding JASPIC domain:
 
 
 	<?xml version="1.0"?>
@@ -93,7 +94,7 @@ To activate the JASPIC module  the file *WEB-INF/jboss-web.xml* needs to be adde
 	    <security-domain>imixs-jwt</security-domain>
 	</jboss-web>
 
-The security domain can be configured in the standalone.xml file:
+The security domain has be configured in the standalone.xml file. See the following example:
 
 	<!-- imixs-jwt module  -->
     <security-domain name="imixs-jwt">

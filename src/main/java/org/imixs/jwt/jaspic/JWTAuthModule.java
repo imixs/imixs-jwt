@@ -32,13 +32,17 @@ import org.imixs.jwt.JWTException;
 import org.imixs.jwt.JWTParser;
 
 /**
- * This Class is a JASPIC AuthModule to authenticate users based on a JWT token.
+ * This Class is a JASPIC Auth Module to authenticate users based on a JWT
+ * token. The module need to be configured into a Java EE application server in
+ * combination with a Web Module.
  * 
- * If the token is set the user will be authenticated and the token will be
- * stored in the user session.
+ * The JASPIC Auth Module expects a JSON Web Token in the Query param 'jwt'. If
+ * the token is set, the user will be authenticated and the token will be stored
+ * in the user session.
  * 
  * If the token is not set the user will not be authenticated.
  * 
+ * @version 1.0
  * @author rsoika,
  */
 @SuppressWarnings("unchecked")
@@ -67,7 +71,6 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 
 	/**
 	 * get Module specific options as configured in options Map
-	 * 
 	 * 
 	 */
 	@SuppressWarnings("rawtypes")
@@ -134,8 +137,9 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 
 		String payload = null;
 		try {
-			// First we consume the JWT in any way - even if the requested URL is not
-			// mandatory
+			// First we consume the JWT - even if the requested URL
+			// is not mandatory. This is because the jwt query param can be part
+			// of a not-mandatory welcome page.
 			payload = consumeJWTPayload(request, response);
 
 			// verify if authentication for the requested resource is mandatory
@@ -151,7 +155,7 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 				cleanSubject(messageInfo, clientSubject);
 				return AuthStatus.FAILURE;
 			} else {
-				// set the caller principal
+				// set the caller principal stored in the current request
 				String id = "" + request.getSession().getAttribute(JWT_SUBJECT);
 				String[] groups = (String[]) request.getSession().getAttribute(JWT_GROUPS);
 				setCallerPrincipal(id, clientSubject, groups);
@@ -206,6 +210,8 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	 * <p>
 	 * This method conveys the outcome of its message processing either by
 	 * returning an AuthStatus value or by throwing an AuthException.
+	 * <p>
+	 * For JWT this method is not used.
 	 * 
 	 * @param messageInfo
 	 *            A contextual object that encapsulates the client request and
@@ -285,11 +291,12 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	 */
 
 	/**
-	 * This Method extracts a JSON Web Token and returns the payload of the current token. If the
-	 * current request contains a JWT the method extracts the payload from the
-	 * JSON Web Token and store the payload into the current session. If the
-	 * request contains no JWT the method test if the session contains a payload
-	 * to be returned.
+	 * This Method extracts a JSON Web Token from the query param 'jwt' and
+	 * returns the payload of the current token. If the current request contains
+	 * a JWT the method extracts the payload from the JSON Web Token and store
+	 * the payload, the userid and the groups into the current session. If the
+	 * request contains no JWT the method verifies if the session already
+	 * contains a payload to be returned.
 	 * 
 	 * @param request
 	 * @return the payload or null if no valid payload exists.
@@ -385,6 +392,11 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 
 	}
 
+	/**
+	 * This method set a new CallerPrincipal. The method is called by the method
+	 * 'validateRequest' if the request was mandatory.
+	 * 
+	 */
 	private boolean setCallerPrincipal(String caller, Subject clientSubject, String[] userGroups) {
 		boolean rvalue = true;
 		boolean assignGroups = true;

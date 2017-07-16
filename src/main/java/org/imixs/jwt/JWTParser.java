@@ -29,6 +29,13 @@ package org.imixs.jwt;
 
 import javax.crypto.SecretKey;
 
+/**
+ * The JWTParser is used to verify a JWT and extract the header and payload part
+ * of the token.
+ * 
+ * @author rsoika
+ *
+ */
 public class JWTParser {
 
 	SecretKey key;
@@ -41,22 +48,20 @@ public class JWTParser {
 		this.key = key;
 		return this;
 	}
-	
+
 	public JWTParser setToken(String token) {
-		this.token=token;
+		this.token = token;
 		return this;
 	}
-
-	
 
 	/**
 	 * Verifies a token and decodes the payload and header in JSON format.
 	 * 
 	 * @return payload
-	 * @throws JWTException 
+	 * @throws JWTException
 	 */
 	public JWTParser verify() throws JWTException {
-		
+
 		if (key == null) {
 			throw new JWTException("MISSING_SECRET_KEY", "No SecretKey defined!");
 		}
@@ -65,45 +70,45 @@ public class JWTParser {
 			throw new JWTException("MISSING_TOKEN", "Token is empty!");
 		}
 
-		
 		// split token
 		String[] parts = token.split("\\.");
-		
-		if (parts==null || parts.length<3) {
+
+		if (parts == null || parts.length < 3) {
 			throw new JWTException("INVALID_TOKEN", "Token is invalid!");
 		}
-		
-		String encodedHeader=parts[0];
-		String encodedPayload=parts[1];
-		signature=parts[2];
-		
+
+		String encodedHeader = parts[0];
+		String encodedPayload = parts[1];
+		signature = parts[2];
+
 		// create and validate signatore
-		 JWTBuilder _builder= new JWTBuilder();
-		String _signature=_builder.setKey(key).setEncodedHeader(encodedHeader).setEncodedPayload(encodedPayload).sign().getSignature();
-		
+		JWTBuilder _builder = new JWTBuilder();
+		String _signature = _builder.setKey(key).setEncodedHeader(encodedHeader).setEncodedPayload(encodedPayload)
+				.sign().getSignature();
+
 		if (!_signature.equals(signature)) {
 			throw new JWTException("INVALID_SIGNATURE", "Signature is invalid!");
 		}
-		
+
 		// update header and payload
-		this.header=HMAC.decodeBase64(encodedHeader.getBytes());
-		this.payload=HMAC.decodeBase64(encodedPayload.getBytes());
-		
+		this.header = HMAC.decodeBase64(encodedHeader.getBytes());
+		this.payload = HMAC.decodeBase64(encodedPayload.getBytes());
+
 		return this;
 	}
 
-	
 	/**
 	 * Returns the decoded header in JSON format
+	 * 
 	 * @return
 	 */
 	public String getHeader() {
 		return this.header;
 	}
 
-	
 	/**
 	 * Returns the decoded header in JSON format
+	 * 
 	 * @return
 	 */
 	public String getPayload() {
