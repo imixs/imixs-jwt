@@ -70,6 +70,19 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	protected final Logger logger = Logger.getLogger(JWTAuthModule.class.getName());
 
 	/**
+	 * Constructor used only by Wildly 10 when using 'login-module-stack name'
+	 * reference.
+	 * 
+	 * @see issue #6
+	 * @param loginModuleStackName
+	 */
+	public JWTAuthModule(String loginModuleStackName) {
+		super();
+		// we do not need the loginModuleStackName here so we skipp this parameter
+		// (see issue #6)
+	}
+
+	/**
 	 * get Module specific options as configured in options Map
 	 * 
 	 */
@@ -90,37 +103,36 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	}
 
 	/**
-	 * Authenticate a received service request. This method conveys the outcome
-	 * of its message processing either by returning an AuthStatus value or by
-	 * throwing an AuthException.
+	 * Authenticate a received service request. This method conveys the outcome of
+	 * its message processing either by returning an AuthStatus value or by throwing
+	 * an AuthException.
 	 * 
 	 * @param messageInfo
 	 *            A contextual object that encapsulates the client request and
-	 *            server response objects, and that may be used to save state
-	 *            across a sequence of calls made to the methods of this
-	 *            interface for the purpose of completing a secure message
-	 *            exchange.
+	 *            server response objects, and that may be used to save state across
+	 *            a sequence of calls made to the methods of this interface for the
+	 *            purpose of completing a secure message exchange.
 	 * 
 	 * @param clientSubject
-	 *            A Subject that represents the source of the service request.
-	 *            It is used by the method implementation to store Principals
-	 *            and credentials validated in the request.
+	 *            A Subject that represents the source of the service request. It is
+	 *            used by the method implementation to store Principals and
+	 *            credentials validated in the request.
 	 * 
 	 * @param serviceSubject
-	 *            A Subject that represents the recipient of the service
-	 *            request, or null.
+	 *            A Subject that represents the recipient of the service request, or
+	 *            null.
 	 * 
 	 * @return An AuthStatus object representing the completion status of the
-	 *         processing performed by the method. The AuthStatus values that
-	 *         may be returned by this method are defined as follows:
+	 *         processing performed by the method. The AuthStatus values that may be
+	 *         returned by this method are defined as follows:
 	 * 
 	 *         <ul>
 	 *         <li>AuthStatus.SUCCESS when the application request message was
 	 *         successfully validated.
 	 * 
 	 *         <li>AuthStatus.SEND_FAILURE to indicate that message validation
-	 *         failed and that an appropriate failure response message is
-	 *         available by calling getResponseMessage on messageInfo.
+	 *         failed and that an appropriate failure response message is available
+	 *         by calling getResponseMessage on messageInfo.
 	 *         </ul>
 	 * 
 	 * @exception AuthException
@@ -176,14 +188,13 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	 * 
 	 * @param messageInfo
 	 *            a contextual object that encapsulates the client request and
-	 *            server response objects, and that may be used to save state
-	 *            across a sequence of calls made to the methods of this
-	 *            interface for the purpose of completing a secure message
-	 *            exchange.
+	 *            server response objects, and that may be used to save state across
+	 *            a sequence of calls made to the methods of this interface for the
+	 *            purpose of completing a secure message exchange.
 	 * 
 	 * @param subject
-	 *            the Subject instance from which the Principals and credentials
-	 *            are to be removed.
+	 *            the Subject instance from which the Principals and credentials are
+	 *            to be removed.
 	 * 
 	 * @exception AuthException
 	 *                If an error occurs during the Subject processing.
@@ -204,60 +215,58 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	/**
 	 * Secure a service response before sending it to the client.
 	 * 
-	 * This method is called to transform the response message acquired by
-	 * calling getResponseMessage (on messageInfo) into the mechanism-specific
-	 * form to be sent by the runtime.
+	 * This method is called to transform the response message acquired by calling
+	 * getResponseMessage (on messageInfo) into the mechanism-specific form to be
+	 * sent by the runtime.
 	 * <p>
-	 * This method conveys the outcome of its message processing either by
-	 * returning an AuthStatus value or by throwing an AuthException.
+	 * This method conveys the outcome of its message processing either by returning
+	 * an AuthStatus value or by throwing an AuthException.
 	 * <p>
 	 * For JWT this method is not used.
 	 * 
 	 * @param messageInfo
 	 *            A contextual object that encapsulates the client request and
-	 *            server response objects, and that may be used to save state
-	 *            across a sequence of calls made to the methods of this
-	 *            interface for the purpose of completing a secure message
-	 *            exchange.
+	 *            server response objects, and that may be used to save state across
+	 *            a sequence of calls made to the methods of this interface for the
+	 *            purpose of completing a secure message exchange.
 	 * 
 	 * @param serviceSubject
-	 *            A Subject that represents the source of the service response,
-	 *            or null. It may be used by the method implementation to
-	 *            retrieve Principals and credentials necessary to secure the
-	 *            response. If the Subject is not null, the method
-	 *            implementation may add additional Principals or credentials
-	 *            (pertaining to the source of the service response) to the
-	 *            Subject.
+	 *            A Subject that represents the source of the service response, or
+	 *            null. It may be used by the method implementation to retrieve
+	 *            Principals and credentials necessary to secure the response. If
+	 *            the Subject is not null, the method implementation may add
+	 *            additional Principals or credentials (pertaining to the source of
+	 *            the service response) to the Subject.
 	 * 
 	 * @return An AuthStatus object representing the completion status of the
-	 *         processing performed by the method. The AuthStatus values that
-	 *         may be returned by this method are defined as follows:
+	 *         processing performed by the method. The AuthStatus values that may be
+	 *         returned by this method are defined as follows:
 	 * 
 	 *         <ul>
-	 *         <li>AuthStatus.SEND_SUCCESS when the application response message
-	 *         was successfully secured. The secured response message may be
-	 *         obtained by calling getResponseMessage on messageInfo.
+	 *         <li>AuthStatus.SEND_SUCCESS when the application response message was
+	 *         successfully secured. The secured response message may be obtained by
+	 *         calling getResponseMessage on messageInfo.
 	 * 
 	 *         <li>AuthStatus.SEND_CONTINUE to indicate that the application
-	 *         response message (within messageInfo) was replaced with a
-	 *         security message that should elicit a security-specific response
-	 *         (in the form of a request) from the peer.
+	 *         response message (within messageInfo) was replaced with a security
+	 *         message that should elicit a security-specific response (in the form
+	 *         of a request) from the peer.
 	 * 
 	 *         This status value serves to inform the calling runtime that (to
 	 *         successfully complete the message exchange) it will need to be
-	 *         capable of continuing the message dialog by processing at least
-	 *         one additional request/response exchange (after having sent the
-	 *         response message returned in messageInfo).
+	 *         capable of continuing the message dialog by processing at least one
+	 *         additional request/response exchange (after having sent the response
+	 *         message returned in messageInfo).
 	 * 
-	 *         When this status value is returned, the application response must
-	 *         be saved by the authentication module such that it can be
-	 *         recovered when the module's validateRequest message is called to
-	 *         process the elicited response.
+	 *         When this status value is returned, the application response must be
+	 *         saved by the authentication module such that it can be recovered when
+	 *         the module's validateRequest message is called to process the
+	 *         elicited response.
 	 * 
-	 *         <li>AuthStatus.SEND_FAILURE to indicate that a failure occurred
-	 *         while securing the response message and that an appropriate
-	 *         failure response message is available by calling
-	 *         getResponseMeessage on messageInfo.
+	 *         <li>AuthStatus.SEND_FAILURE to indicate that a failure occurred while
+	 *         securing the response message and that an appropriate failure
+	 *         response message is available by calling getResponseMeessage on
+	 *         messageInfo.
 	 *         </ul>
 	 * 
 	 * @exception AuthException
@@ -272,8 +281,8 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	}
 
 	/**
-	 * Get the one or more Class objects representing the message types
-	 * supported by the module.
+	 * Get the one or more Class objects representing the message types supported by
+	 * the module.
 	 * 
 	 * @return An array of Class objects, with at least one element defining a
 	 *         message type supported by the module.
@@ -291,12 +300,12 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	 */
 
 	/**
-	 * This Method extracts a JSON Web Token from the query param 'jwt' and
-	 * returns the payload of the current token. If the current request contains
-	 * a JWT the method extracts the payload from the JSON Web Token and store
-	 * the payload, the userid and the groups into the current session. If the
-	 * request contains no JWT the method verifies if the session already
-	 * contains a payload to be returned.
+	 * This Method extracts a JSON Web Token from the query param 'jwt' and returns
+	 * the payload of the current token. If the current request contains a JWT the
+	 * method extracts the payload from the JSON Web Token and store the payload,
+	 * the userid and the groups into the current session. If the request contains
+	 * no JWT the method verifies if the session already contains a payload to be
+	 * returned.
 	 * 
 	 * @param request
 	 * @return the payload or null if no valid payload exists.
