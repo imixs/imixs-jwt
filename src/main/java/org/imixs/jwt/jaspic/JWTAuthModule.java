@@ -72,6 +72,13 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	protected final Logger logger = Logger.getLogger(JWTAuthModule.class.getName());
 
 	/**
+	 * Default constructor
+	 */
+	public JWTAuthModule() {
+		super();
+	}
+
+	/**
 	 * Constructor used only by Wildly 10 when using 'login-module-stack name'
 	 * reference.
 	 * 
@@ -80,7 +87,7 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	 */
 	public JWTAuthModule(String loginModuleStackName) {
 		super();
-		// we do not need the loginModuleStackName here so we skipp this parameter
+		// we do not need the loginModuleStackName here so we skip this parameter
 		// (see issue #6)
 	}
 
@@ -313,7 +320,7 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	 * @return the payload or null if no valid payload exists.
 	 * @throws JWTException
 	 */
-	private String consumeJWTPayload(HttpServletRequest request, HttpServletResponse response) throws JWTException {
+	String consumeJWTPayload(HttpServletRequest request, HttpServletResponse response) throws JWTException {
 		String _payload = null;
 		logger.fine("consume JWT Payload....");
 
@@ -332,15 +339,10 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 				if (iPos > -1) {
 					token = token.substring(0, iPos - 1);
 				}
-				
+
 				// url-decoding of token (issue #7)
-				try {
-					token = URLDecoder.decode(token, "UTF-8");
-				} catch (UnsupportedEncodingException e) {
-					logger.severe("URL decoding of token failed " + e.getMessage());
-					return null;
-				}
-				
+				token = getURLDecodedToken(token);
+
 				logger.fine("jwt=" + token);
 				// parse token...
 				String secret = (String) options.get(MODULE_OPTION_SECRET);
@@ -417,7 +419,7 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	 * 'validateRequest' if the request was mandatory.
 	 * 
 	 */
-	private boolean setCallerPrincipal(String caller, Subject clientSubject, String[] userGroups) {
+	boolean setCallerPrincipal(String caller, Subject clientSubject, String[] userGroups) {
 		boolean rvalue = true;
 		boolean assignGroups = true;
 
@@ -444,6 +446,31 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 		}
 
 		return rvalue;
+	}
+
+	/**
+	 * This method decodes the token with the java.netURLDecoder. The method takes
+	 * care about the '+' character. The plus sign "+" is converted into a space
+	 * character " " by the URLDecoder class. This method replaces the " " again
+	 * back into "+".
+	 * 
+	 * See also : https://docs.oracle.com/javase/6/docs/api/java/net/URLDecoder.html
+	 * 
+	 * @see issue #7
+	 * @param token
+	 * @return URL decoded token
+	 */
+	String getURLDecodedToken(String token) {
+
+		try {
+			token = URLDecoder.decode(token, "UTF-8");
+			// convert " " into "+"
+			token = token.replaceAll(" ", "+");
+		} catch (UnsupportedEncodingException e) {
+			logger.severe("URL decoding of token failed " + e.getMessage());
+			return null;
+		}
+		return token;
 	}
 
 }
