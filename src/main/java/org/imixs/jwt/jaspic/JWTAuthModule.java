@@ -1,6 +1,8 @@
 package org.imixs.jwt.jaspic;
 
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.logging.Level;
@@ -330,6 +332,15 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 				if (iPos > -1) {
 					token = token.substring(0, iPos - 1);
 				}
+				
+				// url-decoding of token (issue #7)
+				try {
+					token = URLDecoder.decode(token, "UTF-8");
+				} catch (UnsupportedEncodingException e) {
+					logger.severe("URL decoding of token failed " + e.getMessage());
+					return null;
+				}
+				
 				logger.fine("jwt=" + token);
 				// parse token...
 				String secret = (String) options.get(MODULE_OPTION_SECRET);
