@@ -1,5 +1,6 @@
 package org.imixs.jwt.jaspic;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -27,6 +28,7 @@ import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.imixs.jwt.HMAC;
 import org.imixs.jwt.JWSAlgorithm;
@@ -158,10 +160,29 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 
 		String payload = null;
 		try {
+			// if we already have a valid token we need to compare it with the new onew...
+			String oldPayload = (String) request.getSession().getAttribute(JWT_PAYLOAD);
+
 			// First we consume the JWT - even if the requested URL
 			// is not mandatory. This is because the jwt query param can be part
 			// of a not-mandatory welcome page.
 			payload = consumeJWTPayload(request, response);
+
+			// invalidate the current session if the token changed!
+			// issue #8
+			if (oldPayload != null && !oldPayload.equals(payload)) {
+				cleanSubject(messageInfo, clientSubject);
+				try {
+					String dieURL = getFullURL(request);
+					response.sendRedirect(dieURL);
+				} catch (IOException e) {
+					// something went totaly wrong...
+					logger.severe(e.getMessage());
+					e.printStackTrace();
+					return AuthStatus.FAILURE;
+				}
+				return AuthStatus.SEND_CONTINUE;
+			}
 
 			// verify if authentication for the requested resource is mandatory
 			Object mandatoryKey = messageInfo.getMap().get(IS_MANDATORY_INFO_KEY);
@@ -213,10 +234,16 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 		if (subject != null) {
 			logger.fine("clean_subject");
 			HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
+
 			request.getSession().removeAttribute(JWT_PAYLOAD);
 			request.getSession().removeAttribute(JWT_SUBJECT);
 			request.getSession().removeAttribute(JWT_GROUPS);
 			subject.getPrincipals().clear();
+
+			// invalidate session
+			HttpSession session = request.getSession(false);
+			session.invalidate();
+
 			logger.fine("user logged out");
 		}
 	}
@@ -473,4 +500,14 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 		return token;
 	}
 
+	static String getFullURL(HttpServletRequest request) {
+		StringBuffer requestURL = request.getRequestURL();
+		String queryString = request.getQueryString();
+
+		if (queryString == null) {
+			return requestURL.toString();
+		} else {
+			return requestURL.append('?').append(queryString).toString();
+		}
+	}
 }
