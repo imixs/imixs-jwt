@@ -73,7 +73,7 @@ To verify and extract the payload of a JSON Web Token (as build in the example b
 
 Imixs-JWT provides a JASPIC authentication module to be used in Java EE Application servers. 
 
-The payload of the JSON Web Token must have the following format:
+The payload of the JSON Web Token is expected in the following format:
 
 	{"sub":"admin","groups":["xxx","yyy"],"displayname":"Administrator"}
 
