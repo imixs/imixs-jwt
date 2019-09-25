@@ -31,7 +31,7 @@ The following example shows how to build a JWT:
 	// We need a signing key...
 	SecretKey secretKey = HMAC.createKey("HmacSHA256", "secret".getBytes());
 	String payload="{\"sub\":\"1234567890\",\"name\":\"John Doe\",\"admin\":true}";
-	JWTBuilder builder = new JWTBuilder().setKey(secretKey).setJSONPayload(payload);
+	JWTBuilder builder = new JWTBuilder().setKey(secretKey).setPayload(payload);
 	System.out.println("JWT=" + builder.getToken());
 	
 	// will result in:
@@ -82,6 +82,13 @@ Where 'sub' is the principal and 'groups' provides an array of groupnames (roles
 With the TokenGenerator a JWT token can be generated from the command line:
 
 	java -cp classes org.imixs.jwt.TokenGenerator secret {"sub":"admin","displayname":"Administrator","groups":["xxx","yyy"]}
+
+**NOTE:** The JASPIC Auth Module accepts Json Web Tokens in a query string or as a bearer token provided in the request header: 
+
+ - /...?jwt=xxxxx
+ - HEADER jwt=xxxx
+ - HEADER Authorization=Bearer xxxx
+	
 
 ## Configuration for Wildfly 10
 
