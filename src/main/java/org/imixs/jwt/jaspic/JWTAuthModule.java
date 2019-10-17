@@ -365,20 +365,22 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 		// 3rd try quersting ?jwt=.....
 		if (token == null || token.isEmpty()) {
 			tokenString = request.getQueryString();
-			int iPos = tokenString.indexOf(QUERY_PARAM_SESSION + "=");
-			if (iPos > -1) {
-				logger.fine("parsing query param " + QUERY_PARAM_SESSION + "....");
-
-				iPos = iPos + (QUERY_PARAM_SESSION + "=").length() + 0;
-				token = tokenString.substring(iPos);
-
-				iPos = token.indexOf("&");
+			if (tokenString!=null && !tokenString.isEmpty()) {
+				int iPos = tokenString.indexOf(QUERY_PARAM_SESSION + "=");
 				if (iPos > -1) {
-					token = token.substring(0, iPos - 1);
+					logger.fine("parsing query param " + QUERY_PARAM_SESSION + "....");
+	
+					iPos = iPos + (QUERY_PARAM_SESSION + "=").length() + 0;
+					token = tokenString.substring(iPos);
+	
+					iPos = token.indexOf("&");
+					if (iPos > -1) {
+						token = token.substring(0, iPos - 1);
+					}
+	
+					// url-decoding of token (issue #7)
+					token = getURLDecodedToken(token);
 				}
-
-				// url-decoding of token (issue #7)
-				token = getURLDecodedToken(token);
 			}
 
 		}
