@@ -375,7 +375,7 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	
 					iPos = token.indexOf("&");
 					if (iPos > -1) {
-						token = token.substring(0, iPos - 1);
+						token = token.substring(0, iPos );
 					}
 	
 					// url-decoding of token (issue #7)
