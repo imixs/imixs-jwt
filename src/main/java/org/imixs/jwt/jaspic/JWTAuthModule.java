@@ -5,6 +5,7 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,8 +67,10 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	private static final String AUTH_TYPE_INFO_KEY = "javax.servlet.http.authType";
 	private static final String QUERY_PARAM_SESSION = "jwt";
 	private static final String MODULE_OPTION_SECRET = "secret";
+	private static final String MODULE_OPTION_EXPIRE = "expire";
 
 	protected static final String JWT_SUBJECT = "imixs.jwt.sub";
+	protected static final String JWT_IAT = "imixs.jwt.iat";
 	protected static final String JWT_GROUPS = "imixs.jwt.groups";
 	protected static final String JWT_PAYLOAD = "imixs.jwt.payload";
 
@@ -118,19 +121,20 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	 * its message processing either by returning an AuthStatus value or by throwing
 	 * an AuthException.
 	 * 
-	 * @param messageInfo    A contextual object that encapsulates the client
-	 *                       request and server response objects, and that may be
-	 *                       used to save state across a sequence of calls made to
-	 *                       the methods of this interface for the purpose of
-	 *                       completing a secure message exchange.
+	 * @param messageInfo
+	 *            A contextual object that encapsulates the client request and
+	 *            server response objects, and that may be used to save state across
+	 *            a sequence of calls made to the methods of this interface for the
+	 *            purpose of completing a secure message exchange.
 	 * 
-	 * @param clientSubject  A Subject that represents the source of the service
-	 *                       request. It is used by the method implementation to
-	 *                       store Principals and credentials validated in the
-	 *                       request.
+	 * @param clientSubject
+	 *            A Subject that represents the source of the service request. It is
+	 *            used by the method implementation to store Principals and
+	 *            credentials validated in the request.
 	 * 
-	 * @param serviceSubject A Subject that represents the recipient of the service
-	 *                       request, or null.
+	 * @param serviceSubject
+	 *            A Subject that represents the recipient of the service request, or
+	 *            null.
 	 * 
 	 * @return An AuthStatus object representing the completion status of the
 	 *         processing performed by the method. The AuthStatus values that may be
@@ -145,9 +149,9 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	 *         by calling getResponseMessage on messageInfo.
 	 *         </ul>
 	 * 
-	 * @exception AuthException When the message processing failed without
-	 *                          establishing a failure response message (in
-	 *                          messageInfo).
+	 * @exception AuthException
+	 *                When the message processing failed without establishing a
+	 *                failure response message (in messageInfo).
 	 */
 	@Override
 	public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject)
@@ -196,6 +200,27 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 				cleanSubject(messageInfo, clientSubject);
 				return AuthStatus.FAILURE;
 			} else {
+				// validate iat
+				long lIat = Long.parseLong("" + request.getSession().getAttribute(JWT_IAT));
+				long lexpireTime=3600000;
+				String sExpireTime = (String) options.get(MODULE_OPTION_EXPIRE);
+				if (sExpireTime == null || sExpireTime.isEmpty()) {
+					// default 60 minutes
+					sExpireTime = "3600000";
+				}
+				try {
+					lexpireTime = Long.parseLong(sExpireTime);
+				} catch (NumberFormatException e) {
+					logger.warning("JWT invalid JASPIC Option '" + MODULE_OPTION_EXPIRE + "' - verify configuraiton!");
+				}
+				if (lexpireTime > 0) {
+					long lNow = new Date().getTime();
+					if (lIat + lexpireTime < lNow) {
+						logger.warning("JWT expired!");
+						return AuthStatus.FAILURE;
+					}
+				}
+
 				// set the caller principal stored in the current request
 				String id = "" + request.getSession().getAttribute(JWT_SUBJECT);
 				String[] groups = (String[]) request.getSession().getAttribute(JWT_GROUPS);
@@ -215,16 +240,18 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	/**
 	 * Remove method specific principals and credentials from the subject.
 	 * 
-	 * @param messageInfo a contextual object that encapsulates the client request
-	 *                    and server response objects, and that may be used to save
-	 *                    state across a sequence of calls made to the methods of
-	 *                    this interface for the purpose of completing a secure
-	 *                    message exchange.
+	 * @param messageInfo
+	 *            a contextual object that encapsulates the client request and
+	 *            server response objects, and that may be used to save state across
+	 *            a sequence of calls made to the methods of this interface for the
+	 *            purpose of completing a secure message exchange.
 	 * 
-	 * @param subject     the Subject instance from which the Principals and
-	 *                    credentials are to be removed.
+	 * @param subject
+	 *            the Subject instance from which the Principals and credentials are
+	 *            to be removed.
 	 * 
-	 * @exception AuthException If an error occurs during the Subject processing.
+	 * @exception AuthException
+	 *                If an error occurs during the Subject processing.
 	 */
 	@Override
 	public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
@@ -257,19 +284,19 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	 * <p>
 	 * For JWT this method is not used.
 	 * 
-	 * @param messageInfo    A contextual object that encapsulates the client
-	 *                       request and server response objects, and that may be
-	 *                       used to save state across a sequence of calls made to
-	 *                       the methods of this interface for the purpose of
-	 *                       completing a secure message exchange.
+	 * @param messageInfo
+	 *            A contextual object that encapsulates the client request and
+	 *            server response objects, and that may be used to save state across
+	 *            a sequence of calls made to the methods of this interface for the
+	 *            purpose of completing a secure message exchange.
 	 * 
-	 * @param serviceSubject A Subject that represents the source of the service
-	 *                       response, or null. It may be used by the method
-	 *                       implementation to retrieve Principals and credentials
-	 *                       necessary to secure the response. If the Subject is not
-	 *                       null, the method implementation may add additional
-	 *                       Principals or credentials (pertaining to the source of
-	 *                       the service response) to the Subject.
+	 * @param serviceSubject
+	 *            A Subject that represents the source of the service response, or
+	 *            null. It may be used by the method implementation to retrieve
+	 *            Principals and credentials necessary to secure the response. If
+	 *            the Subject is not null, the method implementation may add
+	 *            additional Principals or credentials (pertaining to the source of
+	 *            the service response) to the Subject.
 	 * 
 	 * @return An AuthStatus object representing the completion status of the
 	 *         processing performed by the method. The AuthStatus values that may be
@@ -302,9 +329,9 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 	 *         messageInfo.
 	 *         </ul>
 	 * 
-	 * @exception AuthException When the message processing failed without
-	 *                          establishing a failure response message (in
-	 *                          messageInfo).
+	 * @exception AuthException
+	 *                When the message processing failed without establishing a
+	 *                failure response message (in messageInfo).
 	 * 
 	 * @author this method was initial implemented by monzillo
 	 */
@@ -354,7 +381,7 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 
 		// 1st try bearer token...
 		tokenString = request.getHeader("Authorization");
-		if (tokenString!=null && tokenString.startsWith("Bearer ")) {
+		if (tokenString != null && tokenString.startsWith("Bearer ")) {
 			token = tokenString.substring("Bearer ".length());
 		}
 
@@ -365,27 +392,25 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 		// 3rd try quersting ?jwt=.....
 		if (token == null || token.isEmpty()) {
 			tokenString = request.getQueryString();
-			if (tokenString!=null && !tokenString.isEmpty()) {
+			if (tokenString != null && !tokenString.isEmpty()) {
 				int iPos = tokenString.indexOf(QUERY_PARAM_SESSION + "=");
 				if (iPos > -1) {
 					logger.fine("parsing query param " + QUERY_PARAM_SESSION + "....");
-	
+
 					iPos = iPos + (QUERY_PARAM_SESSION + "=").length() + 0;
 					token = tokenString.substring(iPos);
-	
+
 					iPos = token.indexOf("&");
 					if (iPos > -1) {
-						token = token.substring(0, iPos );
+						token = token.substring(0, iPos);
 					}
-	
+
 					// url-decoding of token (issue #7)
 					token = getURLDecodedToken(token);
 				}
 			}
 
 		}
-
-		
 
 		if (token != null && !token.isEmpty()) {
 			logger.fine("jwt=" + token);
@@ -405,8 +430,23 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 				// store payload into session
 				request.getSession().setAttribute(JWT_PAYLOAD, _payload);
 
-				// store sub (userid) into session
-				request.getSession().setAttribute(JWT_SUBJECT, payloadObject.getString("sub"));
+				try {
+					// store issue date
+					request.getSession().setAttribute(JWT_IAT, payloadObject.getString("iat"));
+				} catch (NullPointerException e) {
+					logger.severe("invalid payload=" + _payload);
+					logger.severe("'iat' is missing!");
+					return null;
+				}
+
+				try {
+					// store sub (userid) into session
+					request.getSession().setAttribute(JWT_SUBJECT, payloadObject.getString("sub"));
+				} catch (NullPointerException e) {
+					logger.severe("invalid payload=" + _payload);
+					logger.severe("'sub' is missing!");
+					return null;
+				}
 				// get the groups as an JSON array and convert them into a
 				// String array
 				JsonArray jsonGroups = payloadObject.getJsonArray("groups");

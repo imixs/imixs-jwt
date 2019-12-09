@@ -27,10 +27,15 @@
 
 package org.imixs.jwt;
 
+import java.io.StringReader;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 
 import javax.crypto.SecretKey;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 
 /**
  * The JWTBuilder can be used to construct a JSON Web Token. The Builder expects
@@ -71,6 +76,23 @@ public class JWTBuilder {
 	 * @return
 	 */
 	public JWTBuilder setPayload(String payload) {
+		
+		// verify if 'iat' is included
+		if (payload!=null) {
+			// insert IAT....
+			String iat=null;
+			JsonReader reader = Json.createReader(new StringReader(payload));
+			JsonObject payloadObject = reader.readObject();
+			try {
+				// test issue date
+				iat= payloadObject.getString("iat");
+			} catch (NullPointerException e) {
+				// does not exist - so we add it
+				iat="\"iat:\"" + new Date().getTime() + "\"";
+				payload="{" + iat + "," + payload.substring(payload.indexOf("{")+1);
+			}
+		}
+		
 		this.payload = HMAC.encodeBase64(payload.getBytes());
 		return this;
 	}

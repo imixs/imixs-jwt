@@ -66,17 +66,17 @@ public class JWTBuilderTest {
 	@Before
 	public void setup() {
 		header = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
-		payload = "{\"sub\":\"1234567890\",\"name\":\"John Doe\",\"admin\":true}";
+		payload = "{\"iat\":\"123\",\"sub\":\"1234567890\",\"name\":\"John Doe\",\"admin\":true}";
 		encodedHeader = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
 		encodedPayload = "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9";
 		secret = "secret";
 		algorithm = "HmacSHA256";
-		signature = "TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ";// expected
+		signature = "P0tXidx2nGdGhmJ9+0bcNqDbM5zU+WKGib0u5osG7Gc";// expected
 																	// base64
 																	// encoded
 																	// signature
 
-		token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ";
+		token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOiIxMjMiLCJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.P0tXidx2nGdGhmJ9+0bcNqDbM5zU+WKGib0u5osG7Gc";
 	}
 
 	/**
@@ -103,7 +103,7 @@ public class JWTBuilderTest {
 		logger.info("header=" + HMAC.decodeBase64(encodedHeader.getBytes()));
 		logger.info("payload=" + HMAC.decodeBase64(encodedPayload.getBytes()));
 		logger.info("signature=" + builder.getSignature());
-		Assert.assertEquals(signature, builder.getSignature());
+		Assert.assertEquals("TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ", builder.getSignature());
 
 	}
 
@@ -128,7 +128,7 @@ public class JWTBuilderTest {
 		JWTBuilder builder = new JWTBuilder().setKey(secretKey).setHeader(header).setPayload(payload).sign();
 
 		logger.info("signature=" + builder.getSignature());
-		Assert.assertEquals(signature, builder.getSignature());
+		Assert.assertEquals("P0tXidx2nGdGhmJ9+0bcNqDbM5zU+WKGib0u5osG7Gc", builder.getSignature());
 
 		
 	}
