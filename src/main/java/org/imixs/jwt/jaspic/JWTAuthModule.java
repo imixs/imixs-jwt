@@ -202,11 +202,11 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 			} else {
 				// validate iat
 				long lIat = Long.parseLong("" + request.getSession().getAttribute(JWT_IAT));
-				long lexpireTime=3600000;
+				long lexpireTime=3600; // 1h
 				String sExpireTime = (String) options.get(MODULE_OPTION_EXPIRE);
 				if (sExpireTime == null || sExpireTime.isEmpty()) {
 					// default 60 minutes
-					sExpireTime = "3600000";
+					sExpireTime = "3600";
 				}
 				try {
 					lexpireTime = Long.parseLong(sExpireTime);

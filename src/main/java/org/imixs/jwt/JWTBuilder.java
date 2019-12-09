@@ -88,7 +88,7 @@ public class JWTBuilder {
 				iat= payloadObject.getString("iat");
 			} catch (NullPointerException e) {
 				// does not exist - so we add it
-				iat="\"iat:\"" + new Date().getTime() + "\"";
+				iat="\"iat:\"" + ((new Date().getTime())/1000) + "\"";
 				payload="{" + iat + "," + payload.substring(payload.indexOf("{")+1);
 			}
 		}

@@ -88,7 +88,17 @@ With the TokenGenerator a JWT token can be generated from the command line:
  - /...?jwt=xxxxx
  - HEADER jwt=xxxx
  - HEADER Authorization=Bearer xxxx
-	
+
+
+## JASPIC Module Options
+
+The JASPIC module expects the following opitions:
+
+| Option        | Descriptionl  |
+| ------------- |:-------------:|
+| secret        | contains the JWT password for decoding the token |
+| cexpire       | defines the expiration time after which the JWT must not be accepted for processing. The value must be a NumericDate representing seconds past 1970-01-01 00:00:00Z. |
+ 	
 
 ## Configuration for Wildfly 10
 
@@ -111,11 +121,13 @@ The security domain has be configured in the standalone.xml file. See the follow
 			</login-module-stack>
 			<auth-module code="org.imixs.jwt.jaspic.JWTAuthModule">
 			 	<module-option name="secret" value="secret"/>
+			 	<module-option name="expire" value="60"/>
 			</auth-module>
 		</authentication-jaspi>
 	</security-domain>
 
 The module-option 'secret' contains the JWT password for decoding the token.
+The module-option 'expire' defines the expiration time after which the JWT must not be accepted for processing. The value must be a NumericDate representing seconds past 1970-01-01 00:00:00Z. 
 
 
 Find more information about JASPIC for Wildfly here:
