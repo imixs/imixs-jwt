@@ -31,6 +31,10 @@ import java.io.StringReader;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.crypto.SecretKey;
 import javax.json.Json;
@@ -50,6 +54,7 @@ public class JWTBuilder {
 	String header;
 	String payload;
 	String signature;
+	Map<String,String> claims;
 	
 	public static String DEFAULT_HEADER = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
 
@@ -96,7 +101,44 @@ public class JWTBuilder {
 		this.payload = HMAC.encodeBase64(payload.getBytes());
 		return this;
 	}
+	
+	public JWTBuilder setClaim(String claim,String value) {
+		if (claims==null) {
+			claims=new HashMap<String,String>();
+		}
+		claims.put(claim, value);
+		return this;
+	}
 
+	/** 
+	 * Builds the payload with all claims
+	 * @return
+	 */
+	@SuppressWarnings("rawtypes")
+	public JWTBuilder build() {
+		if (claims==null) {
+			claims=new HashMap<String,String>();
+		}
+		if (!claims.containsKey("iat")) {
+			// iat does not exist - so we add it
+			claims.put("iat", ""+((new Date().getTime())/1000));
+		}
+		
+		payload="{";
+		Iterator<Entry<String, String>> it = claims.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry pair = (Map.Entry)it.next();
+	        payload=payload+"\""+pair.getKey() + "\":\""+ pair.getValue() + "\",";
+	        it.remove(); // avoids a ConcurrentModificationException
+	    }
+	    // remove last ,
+	    payload=payload.substring(0,payload.length()-1) + "}";
+	    
+	    this.payload = HMAC.encodeBase64(payload.getBytes());
+	    
+		return this;
+	}
+	
 	/**
 	 * Set an base64 encoded header
 	 * 

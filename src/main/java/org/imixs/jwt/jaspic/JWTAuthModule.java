@@ -202,7 +202,7 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 			} else {
 				// validate iat
 				long lIat = Long.parseLong("" + request.getSession().getAttribute(JWT_IAT));
-				long lexpireTime=3600; // 1h
+				long lexpireTime = 3600; // 1h
 				String sExpireTime = (String) options.get(MODULE_OPTION_EXPIRE);
 				if (sExpireTime == null || sExpireTime.isEmpty()) {
 					// default 60 minutes
@@ -215,7 +215,7 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 				}
 				if (lexpireTime > 0) {
 					long lNow = new Date().getTime();
-					if (lIat + lexpireTime < lNow) {
+					if (((lIat*1000)  + (lexpireTime * 1000)) < lNow) {
 						logger.warning("JWT expired!");
 						return AuthStatus.FAILURE;
 					}
