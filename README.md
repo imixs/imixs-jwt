@@ -94,13 +94,13 @@ With the TokenGenerator a JWT token can be generated from the command line:
 
 The JASPIC module expects the following opitions:
 
-| Option        | Descriptionl  |
+| Option        | Description   |
 | ------------- |---------------|
 | secret        | contains the JWT password for decoding the token |
-| cexpire       | defines the expiration time after which the JWT must not be accepted for processing. The value must be a NumericDate representing seconds past 1970-01-01 00:00:00Z. |
+| expire        | defines the expiration time after which the JWT must not be accepted for processing. The value must be a NumericDate representing seconds past 1970-01-01 00:00:00Z. |
  	
 
-## Configuration for Wildfly 10
+### Configuration for Wildfly 10
 
 To install the AuthModule in a Wildfly 10 application server, the module must be part of the web application.
 To activate the JASPIC module, the file *WEB-INF/jboss-web.xml* needs to be added, that references the corresponding JASPIC domain:
@@ -126,8 +126,6 @@ The security domain has be configured in the standalone.xml file. See the follow
 		</authentication-jaspi>
 	</security-domain>
 
-The module-option 'secret' contains the JWT password for decoding the token.
-The module-option 'expire' defines the expiration time after which the JWT must not be accepted for processing. The value must be a NumericDate representing seconds past 1970-01-01 00:00:00Z. 
 
 
 Find more information about JASPIC for Wildfly here:
@@ -135,3 +133,29 @@ Find more information about JASPIC for Wildfly here:
 - http://arjan-tijms.omnifaces.org/2015/08/activating-jaspic-in-jboss-wildfly.html
 - https://developer.jboss.org/wiki/JBossAS7EnablingJASPIAuthenticationForWebApplications
 - https://stackoverflow.com/questions/30033105/jaspic-module-not-propagating-principal-to-local-ejb-in-jboss-7-4
+
+### Configuration for Glassfish / Payara
+
+To install the AuthModule in a Glassfish or Payara application server, the module must be part of the web application.
+To activate the JASPIC module, the file *WEB-INF/glassfish-web.xml* needs to be added, that references the corresponding JASPIC module:
+
+	<?xml version="1.0" encoding="UTF-8"?>
+	<!DOCTYPE glassfish-web-app PUBLIC "-//GlassFish.org//DTD GlassFish Application Server 3.1 Servlet 3.0//EN" "http://glassfish.org/dtds/glassfish-web-app_3_0-1.dtd">
+	<glassfish-web-app httpservlet-security-provider="imixs-jwt">
+	</glassfish-web-app>
+
+The security domain has be configured in the section 'security-service' of the domain.xml file. See the following example:
+
+
+        ....
+        <message-security-config auth-layer="HttpServlet">
+          ....
+          <provider-config provider-type="server" provider-id="imixs-jwt" class-name="org.imixs.jwt.jaspic.JWTAuthModule">
+            <property name="secret" value="secret"></property>
+            <property name="expire" value="60"></property>
+            <response-policy></response-policy>
+            <request-policy></request-policy>
+          </provider-config>
+        </message-security-config>
+        ...
+
