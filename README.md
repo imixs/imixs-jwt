@@ -95,7 +95,7 @@ With the TokenGenerator a JWT token can be generated from the command line:
 The JASPIC module expects the following opitions:
 
 | Option        | Descriptionl  |
-| ------------- |:-------------:|
+| ------------- |---------------|
 | secret        | contains the JWT password for decoding the token |
 | cexpire       | defines the expiration time after which the JWT must not be accepted for processing. The value must be a NumericDate representing seconds past 1970-01-01 00:00:00Z. |
  	
