@@ -1,4 +1,5 @@
 /*******************************************************************************
+ * <pre>
  *  Imixs Workflow 
  *  Copyright (C) 2001, 2011 Imixs Software Solutions GmbH,  
  *  http://www.imixs.com
@@ -17,12 +18,13 @@
  *  License at http://www.gnu.org/licenses/gpl.html
  *  
  *  Project: 
- *  	http://www.imixs.org
- *  	http://java.net/projects/imixs-workflow
+ *      http://www.imixs.org
+ *      http://java.net/projects/imixs-workflow
  *  
  *  Contributors:  
- *  	Imixs Software Solutions GmbH - initial API and implementation
- *  	Ralph Soika - Software Developer
+ *      Imixs Software Solutions GmbH - initial API and implementation
+ *      Ralph Soika - Software Developer
+ * </pre>
  *******************************************************************************/
 
 package org.imixs.jwt;
