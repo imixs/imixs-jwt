@@ -56,6 +56,7 @@ import javax.security.auth.message.callback.CallerPrincipalCallback;
 import javax.security.auth.message.callback.GroupPrincipalCallback;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.module.ServerAuthModule;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -397,6 +398,7 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
     if (token == null) {
       token = request.getHeader("jwt");
     }
+    
     // 3rd try quersting ?jwt=.....
     if (token == null || token.isEmpty()) {
       tokenString = request.getQueryString();
@@ -418,6 +420,17 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
         }
       }
 
+    }
+    
+    // 4. try 'jwt' cookie
+    Cookie[] cookies = request.getCookies();
+    if (cookies!=null) {
+    	for (Cookie cookie: cookies) {
+    		if ("jwt".equals(cookie.getName())) {
+    			token=cookie.getValue();
+    			break;
+    		}
+    	}
     }
 
     if (token != null && !token.isEmpty()) {
