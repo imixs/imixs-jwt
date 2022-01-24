@@ -201,8 +201,13 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
         } catch (IOException e) {
           // something went totaly wrong...
           logger.severe(e.getMessage());
-          e.printStackTrace();
-          return AuthStatus.FAILURE;
+          if (logger.isLoggable(Level.FINEST)) {
+              e.printStackTrace();
+          }
+          try {
+              response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid request - jwt changed!");
+          } catch (IOException e1) { }
+          return AuthStatus.SEND_FAILURE;
         }
         return AuthStatus.SEND_CONTINUE;
       }
@@ -218,7 +223,10 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
       if (payload == null) {
         logger.fine("validateRequest failed!");
         cleanSubject(messageInfo, clientSubject);
-        return AuthStatus.FAILURE;
+        try {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing token!");
+        } catch (IOException e1) { }
+        return AuthStatus.SEND_FAILURE;
       } else {
         // validate iat
         long lIat = Long.parseLong("" + request.getSession().getAttribute(JWT_IAT));
@@ -238,7 +246,10 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
           long lNow = new Date().getTime();
           if (((lIat * 1000) + (lexpireTime * 1000)) < lNow) {
             logger.warning("JWT expired!");
-            return AuthStatus.FAILURE;
+            try {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "invalid token!");
+            } catch (IOException e1) { }            
+            return AuthStatus.SEND_FAILURE;
           }
         }
 
@@ -252,9 +263,14 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
       }
     } catch (JWTException e) {
       logger.severe(e.getMessage());
+      if (logger.isLoggable(Level.FINEST)) {
+          e.printStackTrace();
+      }
       cleanSubject(messageInfo, clientSubject);
-      e.printStackTrace();
-      return AuthStatus.FAILURE;
+      try {
+          response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "invalid token!");
+      } catch (IOException e1) { }
+      return AuthStatus.SEND_FAILURE;
     }
   }
 
