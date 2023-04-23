@@ -3,7 +3,7 @@
 	<groupId>org.imixs.jwt</groupId>
 	<artifactId>imixs-jwt</artifactId>
 	<name>Imixs-JWT</name>
-	<version>1.1.1</version>
+	<version>1.1.1-SNAPSHOT</version>
 
 
 	<description>
