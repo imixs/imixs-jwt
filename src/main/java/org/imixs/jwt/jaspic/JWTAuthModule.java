@@ -39,27 +39,27 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.SecretKey;
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonException;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonException;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.message.AuthException;
-import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
-import javax.security.auth.message.MessagePolicy;
-import javax.security.auth.message.callback.CallerPrincipalCallback;
-import javax.security.auth.message.callback.GroupPrincipalCallback;
-import javax.security.auth.message.config.ServerAuthContext;
-import javax.security.auth.message.module.ServerAuthModule;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.security.auth.message.AuthException;
+import jakarta.security.auth.message.AuthStatus;
+import jakarta.security.auth.message.MessageInfo;
+import jakarta.security.auth.message.MessagePolicy;
+import jakarta.security.auth.message.callback.CallerPrincipalCallback;
+import jakarta.security.auth.message.callback.GroupPrincipalCallback;
+import jakarta.security.auth.message.config.ServerAuthContext;
+import jakarta.security.auth.message.module.ServerAuthModule;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.imixs.jwt.HMAC;
 import org.imixs.jwt.JWSAlgorithm;
 import org.imixs.jwt.JWTException;
@@ -82,7 +82,7 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
 
   @SuppressWarnings("rawtypes")
   protected static final Class[] supportedMessageTypes = new Class[] {
-      javax.servlet.http.HttpServletRequest.class, javax.servlet.http.HttpServletResponse.class};
+    jakarta.servlet.http.HttpServletRequest.class, jakarta.servlet.http.HttpServletResponse.class};
 
   @SuppressWarnings("rawtypes")
   protected Map options;
@@ -91,8 +91,8 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
   protected MessagePolicy responsePolicy;
 
   private static final String IS_MANDATORY_INFO_KEY =
-      "javax.security.auth.message.MessagePolicy.isMandatory";
-  private static final String AUTH_TYPE_INFO_KEY = "javax.servlet.http.authType";
+      "jakarta.security.auth.message.MessagePolicy.isMandatory";
+  private static final String AUTH_TYPE_INFO_KEY = "jakarta.servlet.http.authType";
   private static final String QUERY_PARAM_SESSION = "jwt";
   private static final String MODULE_OPTION_SECRET = "secret";
   private static final String MODULE_OPTION_EXPIRE = "expire";
@@ -495,7 +495,7 @@ public class JWTAuthModule implements ServerAuthModule, ServerAuthContext {
         // store groups into session
         request.getSession().setAttribute(JWT_GROUPS, stringGroups);
 
-      } catch (javax.json.stream.JsonParsingException j1) {
+      } catch (jakarta.json.stream.JsonParsingException j1) {
         logger.severe("invalid payload=" + _payload);
         logger
             .severe("JSON object or array cannot be created due to i/o error: " + j1.getMessage());

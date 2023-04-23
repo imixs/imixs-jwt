@@ -38,10 +38,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.crypto.SecretKey;
-import javax.json.Json;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+import jakarta.json.Json;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 
 /**
  * The JWTBuilder can be used to construct a JSON Web Token. The Builder expects a valid SecrectKey
